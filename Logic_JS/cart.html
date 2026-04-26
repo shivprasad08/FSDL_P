@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Q11 - Shopping Cart (Detailed)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 40px 20px; }
+  .container { max-width: 720px; margin: 0 auto; }
+  h2 { font-size: 1.8rem; color: #1a1a2e; margin-bottom: 24px; }
+
+  .cart { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.09); margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #1a1a2e; color: #fff; padding: 14px 16px; text-align: left; font-size: 0.85rem; letter-spacing: 1px; }
+  th:not(:first-child), td:not(:first-child) { text-align: center; }
+  td { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; font-size: 0.92rem; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+
+  .product { display: flex; align-items: center; gap: 12px; }
+  .icon { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+  .product-name { font-weight: 600; font-size: 0.92rem; }
+  .product-tag  { font-size: 0.75rem; color: #999; }
+
+  .qty-control { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .qty-btn { width: 30px; height: 30px; border: 1px solid #ddd; background: #f8f8f8; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: all 0.15s; }
+  .qty-btn:hover { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+  .qty-num { font-weight: 700; min-width: 20px; text-align: center; }
+
+  .subtotal { font-weight: 700; color: #1a1a2e; }
+  .remove { background: none; border: none; cursor: pointer; font-size: 1.1rem; color: #ccc; transition: color 0.15s; }
+  .remove:hover { color: #e74c3c; }
+
+  .summary { background: #fff; border-radius: 12px; padding: 22px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.09); }
+  .summary-row   { display: flex; justify-content: space-between; font-size: 0.9rem; color: #666; margin-bottom: 10px; }
+  .summary-total { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 700; color: #1a1a2e; border-top: 2px solid #f0f0f0; padding-top: 14px; margin-top: 6px; }
+  .checkout { width: 100%; margin-top: 16px; padding: 13px; background: #1a1a2e; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .checkout:hover { opacity: 0.85; }
+  .empty { text-align: center; padding: 40px; color: #bbb; display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>🛒 Your Cart</h2>
+
+  <div class="cart">
+    <table>
+      <thead>
+        <tr><th>Product</th><th>Price</th><th>Quantity</th><th>Subtotal</th><th></th></tr>
+      </thead>
+      <tbody id="cartBody"></tbody>
+    </table>
+    <div class="empty" id="emptyMsg">Your cart is empty 🛒</div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-row"><span>Subtotal</span><span id="subtotalAmt">₹0</span></div>
+    <div class="summary-row"><span>Shipping</span><span>₹99</span></div>
+    <div class="summary-row"><span>Discount (10%)</span><span id="discountAmt">−₹0</span></div>
+    <div class="summary-total"><span>Total</span><span id="totalAmt">₹99</span></div>
+    <button class="checkout" onclick="alert('Order placed! 🎉')">Proceed to Checkout →</button>
+  </div>
+</div>
+
+<script>
+  const products = [
+    { name: 'Headphones',        tag: 'Electronics', icon: '🎧', bg: '#e8f4fd', price: 1500, qty: 1 },
+    { name: 'Wireless Mouse',    tag: 'Accessories',  icon: '🖱️', bg: '#fef9e7', price: 800,  qty: 1 },
+    { name: 'Mechanical Keyboard', tag: 'Accessories', icon: '⌨️', bg: '#f0fff4', price: 1200, qty: 2 },
+    { name: 'USB-C Hub',         tag: 'Electronics', icon: '🔌', bg: '#fdf2f8', price: 650,  qty: 1 },
+  ];
+
+  function render() {
+    const tbody = document.getElementById('cartBody');
+    tbody.innerHTML = '';
+    let subtotal = 0;
+
+    products.forEach((p, i) => {
+      if (p.qty === 0) return;
+      const sub = p.price * p.qty;
+      subtotal += sub;
+      tbody.innerHTML += `
+        <tr>
+          <td><div class="product">
+            <div class="icon" style="background:${p.bg}">${p.icon}</div>
+            <div><div class="product-name">${p.name}</div><div class="product-tag">${p.tag}</div></div>
+          </div></td>
+          <td>₹${p.price.toLocaleString()}</td>
+          <td><div class="qty-control">
+            <button class="qty-btn" onclick="change(${i},-1)">−</button>
+            <span class="qty-num">${p.qty}</span>
+            <button class="qty-btn" onclick="change(${i},1)">+</button>
+          </div></td>
+          <td class="subtotal">₹${sub.toLocaleString()}</td>
+          <td><button class="remove" onclick="remove(${i})">🗑</button></td>
+        </tr>`;
+    });
+
+    const hasItems = products.some(p => p.qty > 0);
+    document.getElementById('emptyMsg').style.display  = hasItems ? 'none'  : 'block';
+    document.querySelector('table').style.display      = hasItems ? 'table' : 'none';
+
+    const discount = Math.round(subtotal * 0.1);
+    document.getElementById('subtotalAmt').textContent = '₹' + subtotal.toLocaleString();
+    document.getElementById('discountAmt').textContent = '−₹' + discount.toLocaleString();
+    document.getElementById('totalAmt').textContent    = '₹' + (subtotal - discount + 99).toLocaleString();
+  }
+
+  function change(i, val) { products[i].qty = Math.max(0, products[i].qty + val); render(); }
+  function remove(i)       { products[i].qty = 0; render(); }
+  render();
+</script>
+</body>
+</html>

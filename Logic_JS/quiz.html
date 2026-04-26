@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Q16 - Quiz App (Detailed)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; }
+  .app { background: #fff; border-radius: 16px; padding: 32px; width: 100%; max-width: 560px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); }
+
+  /* HEADER */
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .quiz-title { font-size: 1.1rem; font-weight: 700; color: #2d3436; }
+  .qnum { font-size: 0.82rem; color: #aaa; }
+
+  /* PROGRESS BAR */
+  .prog-bar { height: 6px; background: #eee; border-radius: 3px; margin-bottom: 28px; }
+  .prog-fill { height: 100%; background: linear-gradient(90deg, #6c5ce7, #a29bfe); border-radius: 3px; transition: width 0.4s ease; }
+
+  /* QUESTION */
+  .question { font-size: 1.1rem; font-weight: 600; color: #2d3436; line-height: 1.5; margin-bottom: 22px; min-height: 56px; }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .opt-btn {
+    padding: 14px 16px; text-align: left; border: 2px solid #eee;
+    background: #fff; border-radius: 10px; cursor: pointer;
+    font-size: 0.92rem; font-family: inherit; transition: all 0.2s;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .opt-btn:hover:not(:disabled) { border-color: #6c5ce7; background: #f5f3ff; }
+  .opt-btn .letter { width: 28px; height: 28px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+  .opt-btn.correct { border-color: #00b894; background: #f0fff8; }
+  .opt-btn.correct .letter { background: #00b894; color: #fff; }
+  .opt-btn.wrong   { border-color: #e74c3c; background: #fff5f5; }
+  .opt-btn.wrong .letter { background: #e74c3c; color: #fff; }
+  .opt-btn:disabled { cursor: default; }
+
+  /* FEEDBACK */
+  .feedback { padding: 12px 16px; border-radius: 8px; font-size: 0.88rem; margin-bottom: 18px; display: none; }
+  .feedback.show { display: block; }
+  .feedback.good { background: #f0fff8; color: #00b894; border: 1px solid #b2dfdb; }
+  .feedback.bad  { background: #fff5f5; color: #e74c3c; border: 1px solid #ffcdd2; }
+
+  /* NEXT BTN */
+  .next-btn { width: 100%; padding: 13px; background: #6c5ce7; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; font-family: inherit; cursor: pointer; display: none; transition: opacity 0.2s; }
+  .next-btn:hover { opacity: 0.85; }
+
+  /* RESULT SCREEN */
+  .result { display: none; text-align: center; }
+  .score-circle { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #6c5ce7, #a29bfe); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px; }
+  .score-num  { font-size: 2rem; font-weight: 700; color: #fff; }
+  .score-denom { font-size: 0.9rem; color: rgba(255,255,255,0.8); }
+  .result h3  { font-size: 1.4rem; color: #2d3436; margin-bottom: 8px; }
+  .result p   { font-size: 0.9rem; color: #aaa; margin-bottom: 24px; }
+  .retry-btn  { padding: 13px 32px; background: #6c5ce7; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+
+  /* TIMER */
+  .timer { font-size: 0.82rem; color: #aaa; text-align: right; margin-bottom: 6px; }
+  .timer span { color: #e74c3c; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- QUIZ SCREEN -->
+  <div id="quizScreen">
+    <div class="header">
+      <div class="quiz-title">📚 Web Dev Quiz</div>
+      <div class="qnum" id="qnum">1 / 5</div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:20%"></div></div>
+    <div class="timer">Time left: <span id="timer">15</span>s</div>
+    <div class="question"  id="question"></div>
+    <div class="options"   id="options"></div>
+    <div class="feedback"  id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="next()">Next Question →</button>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="result" id="resultScreen">
+    <div class="score-circle">
+      <div class="score-num"  id="scoreNum">0</div>
+      <div class="score-denom" id="scoreDenom">/ 5</div>
+    </div>
+    <h3 id="resultTitle"></h3>
+    <p  id="resultMsg"></p>
+    <button class="retry-btn" onclick="init()">🔄 Try Again</button>
+  </div>
+</div>
+
+<script>
+  const questions = [
+    { q: 'What does HTML stand for?',
+      options: ['Hyper Text Markup Language', 'Hot Mail Language', 'How To Make Links', 'Hyper Transfer Markup Language'], ans: 0,
+      explain: 'HTML = Hyper Text Markup Language — the standard language for web pages.' },
+    { q: 'Which CSS property changes text color?',
+      options: ['font-color', 'text-color', 'color', 'foreground'], ans: 2,
+      explain: 'The "color" property sets the text color in CSS.' },
+    { q: 'What does CSS stand for?',
+      options: ['Computer Style Sheets', 'Creative Style Sheets', 'Cascading Style Sheets', 'Colorful Style Sheets'], ans: 2,
+      explain: 'CSS = Cascading Style Sheets — used to style HTML elements.' },
+    { q: 'Which keyword declares a constant in JavaScript?',
+      options: ['var', 'let', 'const', 'static'], ans: 2,
+      explain: '"const" declares a block-scoped constant. It cannot be reassigned.' },
+    { q: 'Which of these is a JavaScript framework?',
+      options: ['Django', 'Laravel', 'React', 'Spring'], ans: 2,
+      explain: 'React is a JS library/framework for building UIs. Others are PHP/Python/Java.' },
+  ];
+
+  let cur = 0, score = 0, timerID = null, timeLeft = 15;
+
+  function init() {
+    cur = 0; score = 0;
+    document.getElementById('quizScreen').style.display  = 'block';
+    document.getElementById('resultScreen').style.display = 'none';
+    load();
+  }
+
+  function load() {
+    const q = questions[cur];
+    document.getElementById('qnum').textContent     = `${cur + 1} / ${questions.length}`;
+    document.getElementById('progFill').style.width = `${((cur + 1) / questions.length) * 100}%`;
+    document.getElementById('question').textContent  = q.q;
+    document.getElementById('feedback').className    = 'feedback';
+    document.getElementById('nextBtn').style.display = 'none';
+
+    const opts = document.getElementById('options');
+    opts.innerHTML = '';
+    const letters = ['A', 'B', 'C', 'D'];
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.innerHTML = `<span class="letter">${letters[i]}</span>${opt}`;
+      btn.onclick   = () => answer(i);
+      opts.appendChild(btn);
+    });
+
+    startTimer();
+  }
+
+  function startTimer() {
+    clearInterval(timerID);
+    timeLeft = 15;
+    document.getElementById('timer').textContent = timeLeft;
+    timerID = setInterval(() => {
+      timeLeft--;
+      document.getElementById('timer').textContent = timeLeft;
+      if (timeLeft <= 0) { clearInterval(timerID); timeUp(); }
+    }, 1000);
+  }
+
+  function timeUp() {
+    const btns = document.querySelectorAll('.opt-btn');
+    btns.forEach(b => b.disabled = true);
+    btns[questions[cur].ans].classList.add('correct');
+    showFeedback(false, '⏰ Time\'s up! ' + questions[cur].explain);
+    document.getElementById('nextBtn').style.display = 'block';
+  }
+
+  function answer(i) {
+    clearInterval(timerID);
+    const q    = questions[cur];
+    const btns = document.querySelectorAll('.opt-btn');
+    btns.forEach(b => b.disabled = true);
+    btns[q.ans].classList.add('correct');
+    const correct = i === q.ans;
+    if (!correct) btns[i].classList.add('wrong');
+    else score++;
+    showFeedback(correct, (correct ? '✅ Correct! ' : '❌ Wrong! ') + q.explain);
+    document.getElementById('nextBtn').style.display = 'block';
+  }
+
+  function showFeedback(good, msg) {
+    const fb = document.getElementById('feedback');
+    fb.textContent = msg;
+    fb.className   = 'feedback show ' + (good ? 'good' : 'bad');
+  }
+
+  function next() {
+    cur++;
+    if (cur < questions.length) { load(); }
+    else { showResult(); }
+  }
+
+  function showResult() {
+    document.getElementById('quizScreen').style.display   = 'none';
+    document.getElementById('resultScreen').style.display = 'block';
+    document.getElementById('scoreNum').textContent    = score;
+    document.getElementById('scoreDenom').textContent  = `/ ${questions.length}`;
+    const pct  = (score / questions.length) * 100;
+    const msgs = [
+      [80, '🎉 Excellent!',   'Outstanding performance! You really know your stuff.'],
+      [60, '👍 Good Job!',    'Nice work! A little more practice and you\'ll ace it.'],
+      [40, '😐 Not Bad',      'Keep studying — you\'re getting there!'],
+      [ 0, '📖 Keep Trying!', 'Don\'t give up! Review the material and try again.'],
+    ];
+    const [, title, msg] = msgs.find(([min]) => pct >= min);
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultMsg').textContent   = msg;
+  }
+
+  init();
+</script>
+</body>
+</html>

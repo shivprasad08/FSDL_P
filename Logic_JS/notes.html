@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Q18 - Notes App (Detailed)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f5f6fa; min-height: 100vh; padding: 40px 20px; }
+  .container { max-width: 800px; margin: 0 auto; }
+
+  /* HEADER */
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  h2 { font-size: 1.8rem; color: #2d3436; }
+  .note-count { font-size: 0.85rem; color: #aaa; }
+  .note-count b { color: #f39c12; }
+
+  /* COMPOSE */
+  .compose { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .compose-top { display: flex; gap: 10px; margin-bottom: 12px; }
+  .title-inp { flex: 1; padding: 10px 14px; border: 2px solid #eee; border-radius: 8px; font-family: inherit; font-size: 0.9rem; outline: none; transition: border 0.2s; }
+  .title-inp:focus { border-color: #f39c12; }
+  .color-picker { display: flex; gap: 6px; align-items: center; }
+  .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.15s; }
+  .color-dot:hover, .color-dot.selected { transform: scale(1.2); border-color: #333; }
+
+  textarea { width: 100%; height: 110px; padding: 12px 14px; border: 2px solid #eee; border-radius: 8px; font-family: inherit; font-size: 0.9rem; resize: vertical; outline: none; transition: border 0.2s; }
+  textarea:focus { border-color: #f39c12; }
+  .compose-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .char-hint { font-size: 0.78rem; color: #aaa; }
+  .add-btn { padding: 10px 24px; background: #f39c12; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .add-btn:hover { opacity: 0.85; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+  .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #eee; padding: 8px 14px; border-radius: 20px; flex: 1; }
+  .search-box input { border: none; outline: none; font-family: inherit; font-size: 0.85rem; width: 100%; }
+  .sort-btn { padding: 8px 14px; border: 1px solid #eee; background: #fff; border-radius: 20px; cursor: pointer; font-size: 0.82rem; }
+
+  /* NOTES GRID */
+  .grid { columns: 2; column-gap: 16px; }
+  .note { break-inside: avoid; margin-bottom: 16px; border-radius: 12px; padding: 16px; border: 1px solid rgba(0,0,0,0.06); animation: pop 0.25s ease; cursor: default; }
+  @keyframes pop { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+  .note.hidden { display: none; }
+
+  .note-title { font-weight: 700; font-size: 0.95rem; color: #2d3436; margin-bottom: 6px; }
+  .note-body  { font-size: 0.85rem; color: #555; line-height: 1.6; white-space: pre-wrap; margin-bottom: 12px; }
+  .note-footer { display: flex; justify-content: space-between; align-items: center; }
+  .note-date { font-size: 0.72rem; color: #aaa; }
+  .note-del  { background: none; border: none; cursor: pointer; font-size: 1rem; color: #ccc; transition: color 0.15s; }
+  .note-del:hover { color: #e74c3c; }
+
+  .empty { text-align: center; padding: 60px 0; color: #ccc; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h2>📒 My Notes</h2>
+    <div class="note-count"><b id="noteCount">0</b> notes saved</div>
+  </div>
+
+  <!-- COMPOSE -->
+  <div class="compose">
+    <div class="compose-top">
+      <input class="title-inp" id="titleInp" placeholder="Note title (optional)">
+      <div class="color-picker" id="colorPicker">
+        <div class="color-dot selected" style="background:#fef9e7" data-color="#fef9e7" onclick="pickColor(this)"></div>
+        <div class="color-dot" style="background:#fde8f0" data-color="#fde8f0" onclick="pickColor(this)"></div>
+        <div class="color-dot" style="background:#e8f8f5" data-color="#e8f8f5" onclick="pickColor(this)"></div>
+        <div class="color-dot" style="background:#eaf4fd" data-color="#eaf4fd" onclick="pickColor(this)"></div>
+        <div class="color-dot" style="background:#f5eef8" data-color="#f5eef8" onclick="pickColor(this)"></div>
+      </div>
+    </div>
+    <textarea id="bodyInp" placeholder="Write your note here..." oninput="updateHint()"></textarea>
+    <div class="compose-bottom">
+      <span class="char-hint" id="charHint">0 characters</span>
+      <button class="add-btn" onclick="addNote()">+ Add Note</button>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-box">🔍 <input id="searchInp" placeholder="Search notes..." oninput="render()"></div>
+    <button class="sort-btn" onclick="toggleSort()">📅 Sort</button>
+    <button class="sort-btn" onclick="clearAll()">🗑 Clear All</button>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="emptyMsg" style="display:none">No notes yet. Write one above! ✍️</div>
+</div>
+
+<script>
+  let notes    = JSON.parse(localStorage.getItem('notes_app') || '[]');
+  let sortDesc = true;
+  let color    = '#fef9e7';
+
+  function save() { localStorage.setItem('notes_app', JSON.stringify(notes)); }
+
+  function pickColor(el) {
+    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+    el.classList.add('selected');
+    color = el.dataset.color;
+  }
+
+  function updateHint() {
+    const len = document.getElementById('bodyInp').value.length;
+    document.getElementById('charHint').textContent = `${len} character${len !== 1 ? 's' : ''}`;
+  }
+
+  function addNote() {
+    const body = document.getElementById('bodyInp').value.trim();
+    if (!body) return;
+    notes.unshift({
+      title: document.getElementById('titleInp').value.trim() || 'Untitled',
+      body,
+      color,
+      date: new Date().toLocaleString()
+    });
+    save(); render();
+    document.getElementById('titleInp').value = '';
+    document.getElementById('bodyInp').value  = '';
+    updateHint();
+  }
+
+  function del(i) { notes.splice(i, 1); save(); render(); }
+
+  function clearAll() {
+    if (notes.length && confirm('Delete all notes?')) { notes = []; save(); render(); }
+  }
+
+  function toggleSort() { sortDesc = !sortDesc; render(); }
+
+  function render() {
+    const search   = document.getElementById('searchInp').value.toLowerCase();
+    const sorted   = [...notes].sort((a, b) => sortDesc ? notes.indexOf(a) - notes.indexOf(b) : notes.indexOf(b) - notes.indexOf(a));
+    const filtered = sorted.filter(n => n.title.toLowerCase().includes(search) || n.body.toLowerCase().includes(search));
+
+    document.getElementById('grid').innerHTML = filtered.map((n, i) => {
+      const realIndex = notes.indexOf(n);
+      return `
+        <div class="note" style="background:${n.color}">
+          <div class="note-title">${n.title}</div>
+          <div class="note-body">${n.body}</div>
+          <div class="note-footer">
+            <span class="note-date">📅 ${n.date}</span>
+            <button class="note-del" onclick="del(${realIndex})">🗑</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('noteCount').textContent      = notes.length;
+    document.getElementById('emptyMsg').style.display     = filtered.length === 0 ? 'block' : 'none';
+    document.getElementById('grid').style.display         = filtered.length === 0 ? 'none'  : 'block';
+  }
+
+  render();
+</script>
+</body>
+</html>
