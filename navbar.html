@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Q7 - Responsive Navbar (Detailed)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; }
+
+  /* ── NAV ── */
+  nav { background: #1a1a2e; padding: 0 36px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,0.3); flex-wrap: wrap; }
+  .logo { color: #fff; font-size: 1.3rem; font-weight: 800; padding: 18px 0; }
+  .logo span { color: #6c5ce7; }
+
+  .nav-links { display: flex; list-style: none; align-items: center; }
+  .nav-links > li > a { display: block; color: #9ca3af; text-decoration: none; padding: 20px 14px; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; position: relative; }
+  .nav-links > li > a::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:2px; background:#6c5ce7; transform:scaleX(0); transition:transform 0.2s; }
+  .nav-links > li > a:hover { color: #fff; }
+  .nav-links > li > a:hover::after { transform: scaleX(1); }
+
+  /* DROPDOWN */
+  .dropdown { position: relative; }
+  .arrow { font-size: 0.7rem; margin-left: 4px; display: inline-block; transition: transform 0.25s; }
+  .dropdown.open .arrow { transform: rotate(180deg); }
+
+  .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: #16213e; min-width: 210px; border-radius: 0 0 10px 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); list-style: none; z-index: 200; animation: dropIn 0.2s ease; }
+  @keyframes dropIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+  .dropdown-menu li a { display: flex; align-items: center; gap: 10px; color: #9ca3af; text-decoration: none; padding: 12px 18px; font-size: 0.86rem; transition: background 0.15s, color 0.15s; }
+  .dropdown-menu li a:hover { background: #6c5ce7; color: #fff; }
+  .dropdown-menu .div { border-top: 1px solid #2a2a4e; margin: 4px 0; }
+  .dropdown.open .dropdown-menu { display: block; }
+
+  /* CTA */
+  .nav-cta { background: #6c5ce7 !important; color: #fff !important; padding: 9px 18px !important; border-radius: 6px; margin-left: 8px; font-weight: 700 !important; }
+  .nav-cta::after { display: none !important; }
+
+  /* HAMBURGER */
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 18px 0; background: none; border: none; }
+  .hamburger span { width: 24px; height: 2px; background: #fff; display: block; transition: all 0.3s; border-radius: 2px; }
+  .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .hamburger { display: flex; }
+    .nav-links { display: none; flex-direction: column; width: 100%; background: #16213e; padding-bottom: 12px; }
+    .nav-links.open { display: flex; }
+    .nav-links > li > a { padding: 13px 20px; border-bottom: 1px solid #1a1a2e; }
+    .nav-links > li > a::after { display: none; }
+    .dropdown-menu { position: static; box-shadow: none; border-radius: 0; background: #0f3460; animation: none; min-width: 100%; }
+    .dropdown-menu li a { padding-left: 36px; }
+    .nav-cta { margin: 10px 20px 4px; display: block; text-align: center; }
+  }
+
+  /* PAGE */
+  .hero { background: linear-gradient(135deg,#1a1a2e,#16213e); color: #fff; padding: 80px 36px; text-align: center; }
+  .hero h1 { font-size: 2.4rem; margin-bottom: 12px; }
+  .hero h1 span { color: #6c5ce7; }
+  .hero p { color: #9ca3af; max-width: 500px; margin: 0 auto 24px; line-height: 1.7; font-size: 0.95rem; }
+  .hero-btn { display: inline-block; padding: 13px 28px; background: #6c5ce7; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 700; }
+
+  .cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; max-width: 900px; margin: 40px auto; padding: 0 24px 40px; }
+  .card { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); text-align: center; }
+  .card-icon { font-size: 2rem; margin-bottom: 10px; }
+  .card h3 { font-size: 0.95rem; color: #2d3436; margin-bottom: 6px; }
+  .card p { font-size: 0.8rem; color: #aaa; line-height: 1.6; }
+  @media(max-width:600px){ .cards { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">My<span>Brand</span></div>
+
+  <button class="hamburger" id="ham" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">About</a></li>
+
+    <!-- DROPDOWN 1 -->
+    <li class="dropdown" id="dd1">
+      <a href="#" onclick="toggleDrop('dd1',event)">Services <span class="arrow">▾</span></a>
+      <ul class="dropdown-menu">
+        <li><a href="#">🎨 Web Design</a></li>
+        <li><a href="#">💻 Development</a></li>
+        <li><a href="#">📈 SEO</a></li>
+        <li class="div"></li>
+        <li><a href="#">🤝 Consulting</a></li>
+      </ul>
+    </li>
+
+    <!-- DROPDOWN 2 -->
+    <li class="dropdown" id="dd2">
+      <a href="#" onclick="toggleDrop('dd2',event)">Products <span class="arrow">▾</span></a>
+      <ul class="dropdown-menu">
+        <li><a href="#">📦 Starter Pack</a></li>
+        <li><a href="#">🚀 Pro Suite</a></li>
+        <li><a href="#">🏢 Enterprise</a></li>
+      </ul>
+    </li>
+
+    <li><a href="#">Portfolio</a></li>
+    <li><a href="#" class="nav-cta">Contact Us</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <h1>Responsive <span>Navigation</span></h1>
+  <p>Resize below 768px for hamburger. Click Services or Products for dropdowns.</p>
+  <a href="#" class="hero-btn">Get Started →</a>
+</div>
+
+<div class="cards">
+  <div class="card"><div class="card-icon">📱</div><h3>Mobile First</h3><p>Hamburger menu on small screens, full navbar on desktop.</p></div>
+  <div class="card"><div class="card-icon">🖱️</div><h3>Multi Dropdown</h3><p>Two dropdown menus with smooth animations and dividers.</p></div>
+  <div class="card"><div class="card-icon">⚡</div><h3>Sticky Nav</h3><p>Stays at top as you scroll. Closes on outside click.</p></div>
+</div>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('open');
+    document.getElementById('ham').classList.toggle('open');
+  }
+  function toggleDrop(id, e) {
+    e.preventDefault();
+    const dd = document.getElementById(id);
+    ['dd1','dd2'].forEach(d => { if(d!==id) document.getElementById(d).classList.remove('open'); });
+    dd.classList.toggle('open');
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.dropdown'))
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+  });
+</script>
+</body>
+</html>

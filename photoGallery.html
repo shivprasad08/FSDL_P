@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Q8 - Photo Gallery (Detailed)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0d0d0d; color: #fff; padding: 40px 20px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  .page-header { text-align: center; margin-bottom: 32px; }
+  .page-header h2 { font-size: 2rem; font-weight: 800; letter-spacing: -1px; }
+  .page-header p  { color: #666; font-size: 0.88rem; margin-top: 6px; }
+
+  /* FILTERS */
+  .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .fbtn { padding: 7px 18px; border: 1px solid #333; background: transparent; color: #888; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-family: inherit; transition: all 0.15s; }
+  .fbtn.active, .fbtn:hover { background: #fff; color: #000; border-color: #fff; }
+
+  /* MASONRY-LIKE GRID */
+  .gallery { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+
+  /* PHOTO CARD */
+  .photo { position: relative; overflow: hidden; border-radius: 12px; cursor: pointer; }
+  .photo.tall { grid-row: span 2; }
+  .photo.hidden { display: none; }
+
+  .photo-img {
+    width: 100%; min-height: 220px; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4.5rem;
+    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); /* ZOOM */
+  }
+  .photo.tall .photo-img { min-height: 454px; }
+  .photo:hover .photo-img { transform: scale(1.08); }
+
+  /* OVERLAY */
+  .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 18px;
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .photo:hover .overlay { opacity: 1; }
+  .overlay-cat  { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+  .overlay-name { font-size: 1rem; font-weight: 700; color: #fff; }
+  .overlay-res  { font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+  /* LIKE BUTTON */
+  .like-btn { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.4); border: none; color: #fff; width: 34px; height: 34px; border-radius: 50%; font-size: 1rem; cursor: pointer; opacity: 0; transition: opacity 0.3s, background 0.2s; display: flex; align-items: center; justify-content: center; }
+  .photo:hover .like-btn { opacity: 1; }
+  .like-btn.liked { background: #e74c3c; }
+
+  /* LIGHTBOX */
+  .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; align-items: center; justify-content: center; z-index: 100; padding: 30px; }
+  .lightbox.open { display: flex; }
+  .lb-box { text-align: center; max-width: 600px; width: 100%; }
+  .lb-img  { min-height: 300px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 9rem; margin-bottom: 16px; }
+  .lb-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+  .lb-cat  { font-size: 0.8rem; color: #888; letter-spacing: 2px; text-transform: uppercase; }
+  .lb-close { position: absolute; top: 20px; right: 24px; background: none; border: 1px solid #444; color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; }
+
+  @media(max-width:640px) { .gallery { grid-template-columns: 1fr 1fr; } .photo.tall { grid-row: span 1; } .photo.tall .photo-img { min-height: 220px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="page-header">
+    <h2>📷 Photo Gallery</h2>
+    <p>Hover for zoom & overlay effect · Click to open lightbox</p>
+  </div>
+
+  <div class="filters">
+    <button class="fbtn active" onclick="setFilter('all',this)">All</button>
+    <button class="fbtn" onclick="setFilter('nature',this)">🌿 Nature</button>
+    <button class="fbtn" onclick="setFilter('architecture',this)">🏛 Architecture</button>
+    <button class="fbtn" onclick="setFilter('food',this)">🍜 Food</button>
+    <button class="fbtn" onclick="setFilter('travel',this)">✈️ Travel</button>
+  </div>
+
+  <div class="gallery">
+    <div class="photo tall" data-cat="nature" onclick="openLB('🌲','Forest Path','nature','linear-gradient(135deg,#d1fae5,#6ee7b7)')">
+      <div class="photo-img" style="background:linear-gradient(135deg,#d1fae5,#6ee7b7)">🌲</div>
+      <button class="like-btn" onclick="like(event,this)">🤍</button>
+      <div class="overlay"><div class="overlay-cat">Nature</div><div class="overlay-name">Forest Path</div><div class="overlay-res">4K · 24MP</div></div>
+    </div>
+
+    <div class="photo" data-cat="architecture" onclick="openLB('🏛','City Hall','architecture','linear-gradient(135deg,#dbeafe,#93c5fd)')">
+      <div class="photo-img" style="background:linear-gradient(135deg,#dbeafe,#93c5fd)">🏛</div>
+      <button class="like-btn" onclick="like(event,this)">🤍</button>
+      <div class="overlay"><div class="overlay-cat">Architecture</div><div class="overlay-name">City Hall</div><div class="overlay-res">4K · 36MP</div></div>
+    </div>
+
+    <div class="photo" data-cat="food" onclick="openLB('🍜','Ramen Bowl','food','linear-gradient(135deg,#fee2e2,#fca5a5)')">
+      <div class="photo-img" style="background:linear-gradient(135deg,#fee2e2,#fca5a5)">🍜</div>
+      <button class="like-btn" onclick="like(event,this)">🤍</button>
+      <div class="overlay"><div class="overlay-cat">Food</div><div class="overlay-name">Ramen Bowl</div><div class="overlay-res">HD · 12MP</div></div>
+    </div>
+
+    <div class="photo" data-cat="travel" onclick="openLB('⛩️','Ancient Temple','travel','linear-gradient(135deg,#fef9c3,#f59e0b)')">
+      <div class="photo-img" style="background:linear-gradient(135deg,#fef9c3,#f59e0b)">⛩️</div>
+      <button class="like-btn" onclick="like(event,this)">🤍</button>
+      <div class="overlay"><div class="overlay-cat">Travel</div><div class="overlay-name">Ancient Temple</div><div class="overlay-res">4K · 48MP</div></div>
+    </div>
+
+    <div class="photo" data-cat="nature" onclick="openLB('🌸','Cherry Blossom','nature','linear-gradient(135deg,#fce7f3,#f9a8d4)')">
+      <div class="photo-img" style="background:linear-gradient(135deg,#fce7f3,#f9a8d4)">🌸</div>
+      <button class="like-btn" onclick="like(event,this)">🤍</button>
+      <div class="overlay"><div class="overlay-cat">Nature</div><div class="overlay-name">Cherry Blossom</div><div class="overlay-res">HD · 20MP</div></div>
+    </div>
+
+    <div class="photo" data-cat="travel" onclick="openLB('🌃','Night Market','travel','linear-gradient(135deg,#ede9fe,#a78bfa)')">
+      <div class="photo-img" style="background:linear-gradient(135deg,#ede9fe,#a78bfa)">🌃</div>
+      <button class="like-btn" onclick="like(event,this)">🤍</button>
+      <div class="overlay"><div class="overlay-cat">Travel</div><div class="overlay-name">Night Market</div><div class="overlay-res">4K · 36MP</div></div>
+    </div>
+
+    <div class="photo" data-cat="architecture" onclick="openLB('🏙️','Glass Tower','architecture','linear-gradient(135deg,#e0f2fe,#38bdf8)')">
+      <div class="photo-img" style="background:linear-gradient(135deg,#e0f2fe,#38bdf8)">🏙️</div>
+      <button class="like-btn" onclick="like(event,this)">🤍</button>
+      <div class="overlay"><div class="overlay-cat">Architecture</div><div class="overlay-name">Glass Tower</div><div class="overlay-res">4K · 42MP</div></div>
+    </div>
+
+    <div class="photo" data-cat="food" onclick="openLB('🍵','Matcha Latte','food','linear-gradient(135deg,#d1fae5,#4ade80)')">
+      <div class="photo-img" style="background:linear-gradient(135deg,#d1fae5,#4ade80)">🍵</div>
+      <button class="like-btn" onclick="like(event,this)">🤍</button>
+      <div class="overlay"><div class="overlay-cat">Food</div><div class="overlay-name">Matcha Latte</div><div class="overlay-res">HD · 16MP</div></div>
+    </div>
+
+    <div class="photo" data-cat="nature" onclick="openLB('⛰️','Mountain Vista','nature','linear-gradient(135deg,#fef3c7,#fbbf24)')">
+      <div class="photo-img" style="background:linear-gradient(135deg,#fef3c7,#fbbf24)">⛰️</div>
+      <button class="like-btn" onclick="like(event,this)">🤍</button>
+      <div class="overlay"><div class="overlay-cat">Nature</div><div class="overlay-name">Mountain Vista</div><div class="overlay-res">4K · 50MP</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLB(event)">
+  <button class="lb-close" onclick="document.getElementById('lightbox').classList.remove('open')">✕</button>
+  <div class="lb-box">
+    <div class="lb-img" id="lbImg"></div>
+    <div class="lb-name" id="lbName"></div>
+    <div class="lb-cat"  id="lbCat"></div>
+  </div>
+</div>
+
+<script>
+  let currentFilter = 'all';
+
+  function setFilter(cat, btn) {
+    currentFilter = cat;
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.photo').forEach(p =>
+      p.classList.toggle('hidden', cat !== 'all' && p.dataset.cat !== cat));
+  }
+
+  function like(e, btn) {
+    e.stopPropagation();
+    btn.classList.toggle('liked');
+    btn.textContent = btn.classList.contains('liked') ? '❤️' : '🤍';
+  }
+
+  function openLB(emoji, name, cat, bg) {
+    document.getElementById('lbImg').textContent   = emoji;
+    document.getElementById('lbImg').style.background = bg;
+    document.getElementById('lbName').textContent  = name;
+    document.getElementById('lbCat').textContent   = cat.toUpperCase();
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function closeLB(e) {
+    if (e.target.id === 'lightbox') document.getElementById('lightbox').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open');
+  });
+</script>
+</body>
+</html>

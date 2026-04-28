@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Q3 - Pricing Toggle (Detailed)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 50px 20px; }
+
+  .page-title { text-align: center; margin-bottom: 8px; }
+  .page-title h2 { font-size: 2rem; color: #2d3436; }
+  .page-title p  { color: #aaa; font-size: 0.9rem; margin-top: 6px; margin-bottom: 28px; }
+
+  /* TOGGLE */
+  .toggle-wrap { display: flex; justify-content: center; align-items: center; gap: 14px; margin-bottom: 40px; }
+  .toggle-label { font-size: 0.95rem; color: #636e72; font-weight: 600; }
+  .toggle-label.active { color: #2d3436; }
+  .switch { position: relative; width: 56px; height: 28px; }
+  .switch input { display: none; }
+  .slider { position: absolute; inset: 0; background: #6c5ce7; border-radius: 28px; cursor: pointer; transition: background 0.3s; }
+  .slider::before { content: ''; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+  input:checked + .slider::before { transform: translateX(28px); }
+  .save-badge { background: #00b894; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+
+  /* CARDS */
+  .cards { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; max-width: 960px; margin: 0 auto; }
+  .card { background: #fff; border: 2px solid #eee; border-radius: 16px; padding: 32px 28px; width: 280px; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+  .card.featured { border-color: #6c5ce7; box-shadow: 0 8px 28px rgba(108,92,231,0.2); }
+
+  .popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #6c5ce7; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 4px 14px; border-radius: 12px; white-space: nowrap; }
+
+  .plan-icon { font-size: 2rem; margin-bottom: 10px; }
+  .plan-name { font-size: 1rem; font-weight: 700; color: #2d3436; margin-bottom: 4px; }
+  .plan-desc { font-size: 0.8rem; color: #aaa; margin-bottom: 18px; }
+
+  .price-wrap { margin-bottom: 20px; }
+  .price { font-size: 2.6rem; font-weight: 800; color: #2d3436; transition: all 0.3s; }
+  .price.featured { color: #6c5ce7; }
+  .currency { font-size: 1.2rem; vertical-align: top; margin-top: 8px; display: inline-block; }
+  .period { font-size: 0.82rem; color: #aaa; font-weight: 400; }
+  .per-year { font-size: 0.75rem; color: #00b894; margin-top: 4px; display: none; }
+  .per-year.show { display: block; }
+
+  .features { list-style: none; margin-bottom: 24px; }
+  .features li { padding: 7px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; color: #636e72; display: flex; align-items: center; gap: 8px; }
+  .features li:last-child { border: none; }
+  .features li .tick { color: #00b894; font-weight: 700; }
+  .features li .cross { color: #ddd; }
+
+  .plan-btn { width: 100%; padding: 13px; border: none; border-radius: 10px; font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .plan-btn.default  { background: #f0f2f5; color: #2d3436; }
+  .plan-btn.featured { background: #6c5ce7; color: #fff; }
+  .plan-btn:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h2>💰 Simple Pricing</h2>
+  <p>No hidden fees. Cancel anytime.</p>
+</div>
+
+<div class="toggle-wrap">
+  <span class="toggle-label active" id="lblMonthly">Monthly</span>
+  <label class="switch">
+    <input type="checkbox" id="toggle" onchange="updatePrices()">
+    <span class="slider"></span>
+  </label>
+  <span class="toggle-label" id="lblYearly">Yearly <span class="save-badge">Save 20%</span></span>
+</div>
+
+<div class="cards">
+  <!-- BASIC -->
+  <div class="card">
+    <div class="plan-icon">🌱</div>
+    <div class="plan-name">Basic</div>
+    <div class="plan-desc">Perfect for individuals</div>
+    <div class="price-wrap">
+      <div class="price"><span class="currency">₹</span><span id="p0">299</span></div>
+      <div class="period"><span id="per0">/month</span></div>
+      <div class="per-year" id="yr0">₹2,868 billed yearly</div>
+    </div>
+    <ul class="features">
+      <li><span class="tick">✓</span> 5 Projects</li>
+      <li><span class="tick">✓</span> 2 GB Storage</li>
+      <li><span class="tick">✓</span> Email Support</li>
+      <li><span class="cross">✗</span> Custom Domain</li>
+      <li><span class="cross">✗</span> Analytics</li>
+    </ul>
+    <button class="plan-btn default">Get Started</button>
+  </div>
+
+  <!-- PRO (FEATURED) -->
+  <div class="card featured">
+    <div class="popular-badge">⭐ Most Popular</div>
+    <div class="plan-icon">🚀</div>
+    <div class="plan-name">Pro</div>
+    <div class="plan-desc">Best for growing teams</div>
+    <div class="price-wrap">
+      <div class="price featured"><span class="currency">₹</span><span id="p1">799</span></div>
+      <div class="period"><span id="per1">/month</span></div>
+      <div class="per-year" id="yr1">₹7,670 billed yearly</div>
+    </div>
+    <ul class="features">
+      <li><span class="tick">✓</span> Unlimited Projects</li>
+      <li><span class="tick">✓</span> 20 GB Storage</li>
+      <li><span class="tick">✓</span> Priority Support</li>
+      <li><span class="tick">✓</span> Custom Domain</li>
+      <li><span class="cross">✗</span> White-label</li>
+    </ul>
+    <button class="plan-btn featured">Get Started</button>
+  </div>
+
+  <!-- ENTERPRISE -->
+  <div class="card">
+    <div class="plan-icon">🏢</div>
+    <div class="plan-name">Enterprise</div>
+    <div class="plan-desc">For large organisations</div>
+    <div class="price-wrap">
+      <div class="price"><span class="currency">₹</span><span id="p2">1999</span></div>
+      <div class="period"><span id="per2">/month</span></div>
+      <div class="per-year" id="yr2">₹19,190 billed yearly</div>
+    </div>
+    <ul class="features">
+      <li><span class="tick">✓</span> Unlimited Everything</li>
+      <li><span class="tick">✓</span> 100 GB Storage</li>
+      <li><span class="tick">✓</span> 24/7 Phone Support</li>
+      <li><span class="tick">✓</span> Custom Domain</li>
+      <li><span class="tick">✓</span> White-label</li>
+    </ul>
+    <button class="plan-btn default">Contact Sales</button>
+  </div>
+</div>
+
+<script>
+  const plans = [
+    { monthly: 299,  yearly: 239  },
+    { monthly: 799,  yearly: 639  },
+    { monthly: 1999, yearly: 1599 },
+  ];
+
+  function updatePrices() {
+    const yearly = document.getElementById('toggle').checked;
+
+    document.getElementById('lblMonthly').classList.toggle('active', !yearly);
+    document.getElementById('lblYearly').classList.toggle('active',  yearly);
+
+    plans.forEach((plan, i) => {
+      const price = yearly ? plan.yearly : plan.monthly;
+      document.getElementById('p'   + i).textContent = price.toLocaleString();
+      document.getElementById('per' + i).textContent = yearly ? '/month' : '/month';
+      document.getElementById('yr'  + i).classList.toggle('show', yearly);
+    });
+  }
+</script>
+</body>
+</html>

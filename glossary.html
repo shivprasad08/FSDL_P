@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Q1 - Digital Glossary (Detailed)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f5f6fa; padding: 40px 20px; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  h2 { font-size: 1.8rem; color: #2d3436; margin-bottom: 4px; }
+  .subtitle { font-size: 0.85rem; color: #aaa; margin-bottom: 24px; }
+
+  .toolbar { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .search-wrap { flex: 1; position: relative; min-width: 200px; }
+  .search-wrap input { width: 100%; padding: 11px 14px 11px 38px; border: 2px solid #eee; border-radius: 10px; font-size: 0.92rem; font-family: inherit; outline: none; transition: border 0.2s; }
+  .search-wrap input:focus { border-color: #6c5ce7; }
+  .search-wrap .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); }
+
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .fbtn { padding: 8px 16px; border: 1px solid #eee; background: #fff; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-family: inherit; color: #636e72; transition: all 0.15s; }
+  .fbtn.active, .fbtn:hover { background: #6c5ce7; color: #fff; border-color: #6c5ce7; }
+
+  .stats { font-size: 0.82rem; color: #aaa; margin-bottom: 14px; }
+  .stats b { color: #6c5ce7; }
+
+  .table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #2d3436; color: #fff; padding: 14px 16px; text-align: left; font-size: 0.8rem; letter-spacing: 1px; }
+  td { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8f9ff; }
+  tr.hidden { display: none; }
+
+  code { background: #eef2ff; color: #6c5ce7; padding: 3px 8px; border-radius: 4px; font-size: 0.82rem; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+  .text      { background: #dfe6e9; color: #636e72; }
+  .structure { background: #dbeafe; color: #2563eb; }
+  .media     { background: #d5f5e3; color: #27ae60; }
+  .form      { background: #fde8d8; color: #e67e22; }
+  .list      { background: #ede9fe; color: #7c3aed; }
+
+  .empty { text-align: center; padding: 40px; color: #ccc; display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>📖 HTML Tag Glossary</h2>
+  <div class="subtitle">Complete reference guide for HTML formatting and structure tags</div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="icon">🔍</span>
+      <input id="search" placeholder="Search tags or descriptions..." oninput="apply()">
+    </div>
+    <div class="filters">
+      <button class="fbtn active" onclick="setCat('all',this)">All</button>
+      <button class="fbtn" onclick="setCat('text',this)">Text</button>
+      <button class="fbtn" onclick="setCat('structure',this)">Structure</button>
+      <button class="fbtn" onclick="setCat('list',this)">List</button>
+      <button class="fbtn" onclick="setCat('form',this)">Form</button>
+      <button class="fbtn" onclick="setCat('media',this)">Media</button>
+    </div>
+  </div>
+
+  <div class="stats">Showing <b id="cnt">18</b> of 18 tags</div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tag</th><th>Category</th><th>Description</th><th>Example</th></tr></thead>
+      <tbody id="tbody">
+        <tr data-cat="structure"><td><code>&lt;h1&gt;–&lt;h6&gt;</code></td><td><span class="badge structure">Structure</span></td><td>Heading tags, h1 largest</td><td><code>&lt;h1&gt;Title&lt;/h1&gt;</code></td></tr>
+        <tr data-cat="structure"><td><code>&lt;p&gt;</code></td><td><span class="badge structure">Structure</span></td><td>Defines a paragraph</td><td><code>&lt;p&gt;Hello&lt;/p&gt;</code></td></tr>
+        <tr data-cat="structure"><td><code>&lt;div&gt;</code></td><td><span class="badge structure">Structure</span></td><td>Block-level container</td><td><code>&lt;div&gt;Block&lt;/div&gt;</code></td></tr>
+        <tr data-cat="structure"><td><code>&lt;span&gt;</code></td><td><span class="badge structure">Structure</span></td><td>Inline container</td><td><code>&lt;span&gt;Inline&lt;/span&gt;</code></td></tr>
+        <tr data-cat="structure"><td><code>&lt;section&gt;</code></td><td><span class="badge structure">Structure</span></td><td>Thematic section of content</td><td><code>&lt;section&gt;...&lt;/section&gt;</code></td></tr>
+        <tr data-cat="text"><td><code>&lt;b&gt;</code></td><td><span class="badge text">Text</span></td><td>Bold text (stylistic)</td><td><code>&lt;b&gt;Bold&lt;/b&gt;</code></td></tr>
+        <tr data-cat="text"><td><code>&lt;strong&gt;</code></td><td><span class="badge text">Text</span></td><td>Bold text (semantic importance)</td><td><code>&lt;strong&gt;Important&lt;/strong&gt;</code></td></tr>
+        <tr data-cat="text"><td><code>&lt;i&gt;</code></td><td><span class="badge text">Text</span></td><td>Italic text (stylistic)</td><td><code>&lt;i&gt;Italic&lt;/i&gt;</code></td></tr>
+        <tr data-cat="text"><td><code>&lt;em&gt;</code></td><td><span class="badge text">Text</span></td><td>Italic text (semantic emphasis)</td><td><code>&lt;em&gt;Emphasis&lt;/em&gt;</code></td></tr>
+        <tr data-cat="text"><td><code>&lt;u&gt;</code></td><td><span class="badge text">Text</span></td><td>Underlined text</td><td><code>&lt;u&gt;Underline&lt;/u&gt;</code></td></tr>
+        <tr data-cat="text"><td><code>&lt;mark&gt;</code></td><td><span class="badge text">Text</span></td><td>Highlighted / marked text</td><td><code>&lt;mark&gt;Highlight&lt;/mark&gt;</code></td></tr>
+        <tr data-cat="media"><td><code>&lt;a&gt;</code></td><td><span class="badge media">Media</span></td><td>Hyperlink / anchor tag</td><td><code>&lt;a href="#"&gt;Link&lt;/a&gt;</code></td></tr>
+        <tr data-cat="media"><td><code>&lt;img&gt;</code></td><td><span class="badge media">Media</span></td><td>Embeds an image</td><td><code>&lt;img src="x.jpg" alt=""&gt;</code></td></tr>
+        <tr data-cat="media"><td><code>&lt;video&gt;</code></td><td><span class="badge media">Media</span></td><td>Embeds a video element</td><td><code>&lt;video src="v.mp4"&gt;&lt;/video&gt;</code></td></tr>
+        <tr data-cat="list"><td><code>&lt;ul&gt;</code></td><td><span class="badge list">List</span></td><td>Unordered bulleted list</td><td><code>&lt;ul&gt;&lt;li&gt;Item&lt;/li&gt;&lt;/ul&gt;</code></td></tr>
+        <tr data-cat="list"><td><code>&lt;ol&gt;</code></td><td><span class="badge list">List</span></td><td>Ordered numbered list</td><td><code>&lt;ol&gt;&lt;li&gt;Item&lt;/li&gt;&lt;/ol&gt;</code></td></tr>
+        <tr data-cat="form"><td><code>&lt;form&gt;</code></td><td><span class="badge form">Form</span></td><td>HTML form wrapper</td><td><code>&lt;form action=""&gt;...&lt;/form&gt;</code></td></tr>
+        <tr data-cat="form"><td><code>&lt;input&gt;</code></td><td><span class="badge form">Form</span></td><td>Input field (text, email, etc.)</td><td><code>&lt;input type="text"&gt;</code></td></tr>
+      </tbody>
+    </table>
+    <div class="empty" id="empty">No tags found matching your search 🔍</div>
+  </div>
+</div>
+
+<script>
+  let cat = 'all';
+  function setCat(c, btn) {
+    cat = c;
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    apply();
+  }
+  function apply() {
+    const q    = document.getElementById('search').value.toLowerCase();
+    const rows = document.querySelectorAll('#tbody tr');
+    let n = 0;
+    rows.forEach(r => {
+      const show = (cat === 'all' || r.dataset.cat === cat) && r.textContent.toLowerCase().includes(q);
+      r.classList.toggle('hidden', !show);
+      if (show) n++;
+    });
+    document.getElementById('cnt').textContent    = n;
+    document.getElementById('empty').style.display = n === 0 ? 'block' : 'none';
+  }
+</script>
+</body>
+</html>

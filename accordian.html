@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Q10 - FAQ Accordion (Detailed)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 50px 20px; }
+  .container { max-width: 700px; margin: 0 auto; }
+
+  .page-header { text-align: center; margin-bottom: 36px; }
+  .page-header h2 { font-size: 2rem; color: #2d3436; margin-bottom: 6px; }
+  .page-header p  { color: #aaa; font-size: 0.88rem; }
+
+  /* SEARCH */
+  .search-wrap { position: relative; margin-bottom: 24px; }
+  .search-wrap input { width: 100%; padding: 13px 16px 13px 42px; border: 2px solid #eee; border-radius: 12px; font-family: inherit; font-size: 0.92rem; outline: none; transition: border 0.2s; background: #fff; }
+  .search-wrap input:focus { border-color: #6c5ce7; }
+  .search-wrap span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); }
+
+  /* CATEGORY TABS */
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab { padding: 7px 16px; border: 1px solid #eee; background: #fff; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-family: inherit; color: #636e72; transition: all 0.15s; }
+  .tab.active, .tab:hover { background: #6c5ce7; color: #fff; border-color: #6c5ce7; }
+
+  /* FAQ ITEM */
+  .faq { background: #fff; border-radius: 12px; margin-bottom: 10px; overflow: hidden; border: 2px solid #eee; transition: border-color 0.2s, box-shadow 0.2s; }
+  .faq.open { border-color: #6c5ce7; box-shadow: 0 4px 16px rgba(108,92,231,0.12); }
+  .faq.hidden { display: none; }
+
+  .question {
+    padding: 18px 20px; display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; user-select: none; gap: 14px;
+  }
+  .question:hover { background: #fafafa; }
+  .faq.open .question { background: #f5f3ff; }
+
+  .q-left { display: flex; align-items: center; gap: 12px; }
+  .q-num  { width: 28px; height: 28px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #636e72; flex-shrink: 0; transition: all 0.2s; }
+  .faq.open .q-num { background: #6c5ce7; color: #fff; }
+  .q-text { font-size: 0.95rem; font-weight: 600; color: #2d3436; }
+
+  .arrow { font-size: 0.8rem; color: #aaa; transition: transform 0.3s; flex-shrink: 0; }
+  .faq.open .arrow { transform: rotate(180deg); color: #6c5ce7; }
+
+  /* ANSWER */
+  .answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .answer-inner { padding: 0 20px 18px 60px; font-size: 0.88rem; color: #636e72; line-height: 1.75; }
+  .answer-inner a { color: #6c5ce7; }
+  .faq.open .answer { max-height: 300px; }
+
+  /* TAGS */
+  .cat-tag { display: inline-block; font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; margin-left: 8px; vertical-align: middle; }
+  .html { background: #fde8d8; color: #e67e22; }
+  .css  { background: #dbeafe; color: #2563eb; }
+  .js   { background: #fef3c7; color: #f59e0b; }
+  .gen  { background: #d1fae5; color: #10b981; }
+
+  /* EMPTY */
+  .no-results { text-align: center; padding: 40px; color: #ccc; display: none; }
+  .no-results.show { display: block; }
+
+  /* FOOTER */
+  .faq-footer { text-align: center; margin-top: 28px; font-size: 0.85rem; color: #aaa; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="page-header">
+    <h2>❓ Frequently Asked Questions</h2>
+    <p>Click a question to expand the answer. Search or filter by category.</p>
+  </div>
+
+  <div class="search-wrap">
+    <span>🔍</span>
+    <input id="search" placeholder="Search questions..." oninput="applyFilter()">
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setCat('all',this)">All</button>
+    <button class="tab" onclick="setCat('html',this)">HTML</button>
+    <button class="tab" onclick="setCat('css',this)">CSS</button>
+    <button class="tab" onclick="setCat('js',this)">JavaScript</button>
+    <button class="tab" onclick="setCat('gen',this)">General</button>
+  </div>
+
+  <div id="faqList">
+    <div class="faq" data-cat="html">
+      <div class="question" onclick="toggle(this)">
+        <div class="q-left"><span class="q-num">1</span><span class="q-text">What is HTML?<span class="cat-tag html">HTML</span></span></div>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="answer"><div class="answer-inner">HTML (HyperText Markup Language) is the standard language for creating web pages. It describes the structure of web content using elements represented by tags like &lt;h1&gt;, &lt;p&gt;, &lt;div&gt;, etc.</div></div>
+    </div>
+
+    <div class="faq" data-cat="css">
+      <div class="question" onclick="toggle(this)">
+        <div class="q-left"><span class="q-num">2</span><span class="q-text">What is CSS used for?<span class="cat-tag css">CSS</span></span></div>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="answer"><div class="answer-inner">CSS (Cascading Style Sheets) controls the visual presentation of web pages — colors, fonts, spacing, layout, animations, and responsiveness. It separates content from design.</div></div>
+    </div>
+
+    <div class="faq" data-cat="js">
+      <div class="question" onclick="toggle(this)">
+        <div class="q-left"><span class="q-num">3</span><span class="q-text">What is JavaScript?<span class="cat-tag js">JS</span></span></div>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="answer"><div class="answer-inner">JavaScript is a programming language that adds interactivity to web pages. It handles events, manipulates the DOM, makes API calls, and powers frameworks like React and Node.js.</div></div>
+    </div>
+
+    <div class="faq" data-cat="js">
+      <div class="question" onclick="toggle(this)">
+        <div class="q-left"><span class="q-num">4</span><span class="q-text">What is the DOM?<span class="cat-tag js">JS</span></span></div>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="answer"><div class="answer-inner">The DOM (Document Object Model) is a programming interface that represents an HTML page as a tree of objects. JavaScript uses the DOM to dynamically read and change content, structure, and styles.</div></div>
+    </div>
+
+    <div class="faq" data-cat="js">
+      <div class="question" onclick="toggle(this)">
+        <div class="q-left"><span class="q-num">5</span><span class="q-text">What is localStorage?<span class="cat-tag js">JS</span></span></div>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="answer"><div class="answer-inner">localStorage is a Web Storage API that stores key-value pairs in the browser persistently — data survives page reloads and browser restarts. Use <code>localStorage.setItem(key, value)</code> and <code>getItem(key)</code>.</div></div>
+    </div>
+
+    <div class="faq" data-cat="css">
+      <div class="question" onclick="toggle(this)">
+        <div class="q-left"><span class="q-num">6</span><span class="q-text">What is Flexbox?<span class="cat-tag css">CSS</span></span></div>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="answer"><div class="answer-inner">Flexbox is a CSS layout model that makes it easy to align and distribute items in a container — horizontally or vertically. Use <code>display: flex</code> on the parent to activate it.</div></div>
+    </div>
+
+    <div class="faq" data-cat="css">
+      <div class="question" onclick="toggle(this)">
+        <div class="q-left"><span class="q-num">7</span><span class="q-text">What is CSS Grid?<span class="cat-tag css">CSS</span></span></div>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="answer"><div class="answer-inner">CSS Grid is a two-dimensional layout system. Unlike Flexbox (one-dimensional), Grid lets you define rows and columns together. Use <code>display: grid</code> and <code>grid-template-columns</code> to create layouts.</div></div>
+    </div>
+
+    <div class="faq" data-cat="gen">
+      <div class="question" onclick="toggle(this)">
+        <div class="q-left"><span class="q-num">8</span><span class="q-text">What is a REST API?<span class="cat-tag gen">General</span></span></div>
+        <span class="arrow">▾</span>
+      </div>
+      <div class="answer"><div class="answer-inner">A REST API (Representational State Transfer) is a way for web applications to communicate using HTTP methods — GET (read), POST (create), PUT (update), DELETE (remove). Data is usually exchanged in JSON format.</div></div>
+    </div>
+  </div>
+
+  <div class="no-results" id="noResults">No questions found matching your search 🔍</div>
+  <div class="faq-footer">Still have questions? <a href="#" style="color:#6c5ce7">Contact Support →</a></div>
+</div>
+
+<script>
+  let currentCat = 'all';
+
+  function toggle(question) {
+    const faq = question.closest('.faq');
+    const isOpen = faq.classList.contains('open');
+    document.querySelectorAll('.faq').forEach(f => f.classList.remove('open'));
+    if (!isOpen) faq.classList.add('open');
+  }
+
+  function setCat(cat, btn) {
+    currentCat = cat;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter();
+  }
+
+  function applyFilter() {
+    const q    = document.getElementById('search').value.toLowerCase();
+    const faqs = document.querySelectorAll('.faq');
+    let visible = 0;
+    faqs.forEach(faq => {
+      const catMatch  = currentCat === 'all' || faq.dataset.cat === currentCat;
+      const textMatch = faq.textContent.toLowerCase().includes(q);
+      const show = catMatch && textMatch;
+      faq.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    document.getElementById('noResults').classList.toggle('show', visible === 0);
+  }
+</script>
+</body>
+</html>
