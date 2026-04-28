@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Event Registration System</h1>
+            <p class="subtitle">Register for events and manage participant details</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="events">Events</button>
+            <button class="tab-btn" data-tab="register">Register Participant</button>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="events" class="tab-content active">
+            <div class="section-header">
+                <h2>Available Events</h2>
+                <button class="btn btn-primary" id="toggleCreateEvent" style="display: none;">Create Event</button>
+            </div>
+
+            <div id="createEventForm" style="display: none;" class="form-container">
+                <h3>Create New Event</h3>
+                <form id="eventForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventName">Event Name *</label>
+                            <input type="text" id="eventName" name="eventName" required>
+                            <span class="error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventCapacity">Capacity *</label>
+                            <input type="number" id="eventCapacity" name="eventCapacity" min="1" required>
+                            <span class="error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventDescription">Description *</label>
+                        <textarea id="eventDescription" name="eventDescription" rows="3" required></textarea>
+                        <span class="error"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventDate">Date *</label>
+                            <input type="date" id="eventDate" name="eventDate" required>
+                            <span class="error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventTime">Time *</label>
+                            <input type="time" id="eventTime" name="eventTime" required>
+                            <span class="error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventLocation">Location *</label>
+                        <input type="text" id="eventLocation" name="eventLocation" required>
+                        <span class="error"></span>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-submit">Create Event</button>
+                        <button type="button" class="btn btn-cancel" onclick="toggleCreateEventForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="eventsList" class="events-grid">
+                <!-- Events will be populated here -->
+            </div>
+
+            <div id="emptyEventsMessage" class="empty-message" style="display: none;">
+                <p>No events available. Create a new event to get started.</p>
+            </div>
+        </div>
+
+        <!-- Register Participant Tab -->
+        <div id="register" class="tab-content">
+            <div class="section-header">
+                <h2>Register for an Event</h2>
+            </div>
+
+            <div class="registration-container">
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="participantEvent">Select Event *</label>
+                        <select id="participantEvent" name="participantEvent" required>
+                            <option value="">Choose an event</option>
+                        </select>
+                        <span class="error"></span>
+                    </div>
+
+                    <div class="event-info" id="eventInfo" style="display: none;">
+                        <p><strong>Date:</strong> <span id="selectedEventDate"></span></p>
+                        <p><strong>Location:</strong> <span id="selectedEventLocation"></span></p>
+                        <p><strong>Available Seats:</strong> <span id="availableSeats">0</span></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="participantName">Full Name *</label>
+                        <input type="text" id="participantName" name="participantName" placeholder="Your full name" required>
+                        <span class="error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="participantEmail">Email *</label>
+                        <input type="email" id="participantEmail" name="participantEmail" placeholder="Your email" required>
+                        <span class="error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="participantPhone">Phone *</label>
+                        <input type="tel" id="participantPhone" name="participantPhone" placeholder="Phone number" required>
+                        <span class="error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="participantCategory">Category *</label>
+                        <select id="participantCategory" name="participantCategory" required>
+                            <option value="">Select category</option>
+                            <option value="Student">Student</option>
+                            <option value="Professional">Professional</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span class="error"></span>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-submit">Register</button>
+                        <button type="reset" class="btn btn-reset">Clear</button>
+                    </div>
+
+                    <div id="registrationMessage" class="message"></div>
+                </form>
+
+                <div id="participantsList" class="participants-section" style="display: none;">
+                    <h3>Registered Participants</h3>
+                    <table class="participants-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Category</th>
+                                <th>Registered</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="participantsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
